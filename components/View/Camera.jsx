@@ -13,14 +13,13 @@ export default function CameraView({
   cameraType,
   camera
 }) {
-  // const onReady = (event) => console.log({event})
   return isNull(hasPermission) ? (
     <View />
   ) : isFalse(hasPermission) ? (
     <ViewText>{onFalse}</ViewText>
   ) : (
     <View style={style}>
-      <Camera style={style} type={cameraType} ratio={"4:3"} ref={camera}>
+      <Camera style={style} type={cameraType} ratio={""} ref={camera}>
         {children}
       </Camera>
     </View>
