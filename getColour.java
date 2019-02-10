@@ -21,45 +21,51 @@ public class getColour{
         }
     }
 	
-	public Color[] getColours() {
-		Color[] colours = null;
+	private int getRed(int color) {
+		return (color >> 16) & 0xFF;
+	}
+	
+	private int getGreen(int color) {
+		return (color >> 8) & 0xFF;
+	}
+	
+	private int getBlue(int color) {
+		return color & 0xFF;
+	}
+	
+	public int[] getColours() {
+		int[] rgbData = null;
+		int colorRed;
+		int colorGreen;
+		int colorBlue;
 		try{
-			colours = new Color[width * height];
-            int count = 0;
-        
-            for(int i=0; i<width; i++) {
-                for(int j=0; j<height; j++) {
-                    count++;
-                    Color colour = new Color(image.getRGB(i, j));
-					colours[j * width + i] = colour;
-                    //System.out.println("P: " + count + "  Red: " + colour.getRed() +"   Green: " + colour.getGreen() + "  Blue: " + colour.getBlue());
-                }
-            }
+			rgbData = new int[width * height];
+			image.getRGB(0,0, width, height, rgbData, 0, width); 
 		} catch(Exception e){
 			System.out.println(e);
 		}
-		return colours;
+		return rgbData;
 	}
 	
-	float getLuminance(Color color){
-		int r = color.getRed();
-        int g = color.getGreen();
-        int b = color.getBlue();
+	float getLuminance(int color){
+		int r = getRed(color);
+        int g = getGreen(color);
+        int b = getBlue(color);
         return 0.299f*r + 0.587f*g + 0.114f*b;
 	}
 	
-	Point predictLaser(Color[] colors, int width, int height, Color targetColor, int colorThreshold) {
+	Point predictLaser(int[] colors, int width, int height, int targetColor, int colorThreshold) {
 		Random rand = new Random();
 		
 		int peakLumX = -1;
 		int peakLumY = -1;
 		float peakLum = -1;
 		
-		for(int j = 0; j < height; j++) {
-			for(int i = 0; i < width; i++) {
-				Color color = colors[j * width + i];
+		for(int j = 0; j < height; j+=1) {
+			for(int i = 0; i < width; i+=1) {
+				int color = colors[j * width + i];
 				
-				int squaredDifferences = (color.getRed() - targetColor.getRed()) * (color.getRed() - targetColor.getRed()) + (color.getGreen() - targetColor.getGreen()) * (color.getGreen() - targetColor.getGreen()) + (color.getBlue() - targetColor.getBlue()) * (color.getBlue() - targetColor.getBlue());
+				int squaredDifferences = (getRed(color) - getRed(targetColor)) * (getRed(color) - getRed(targetColor)) + (getGreen(color) - getGreen(targetColor)) * (getGreen(color) - getGreen(targetColor)) + (getBlue(color) - getBlue(targetColor)) * (getBlue(color) - getBlue(targetColor));
 				
 				if (squaredDifferences > colorThreshold) {
 					continue;
@@ -85,10 +91,10 @@ public class getColour{
 						if((i2 < -5 || i2 > 5) && (j2 < -5 || j2 > 5)) {
 							int r = rand.nextInt(totalSamples - samplesTaken);
 							if (r < (desiredSamples - samplesAccepted)) {
-								Color c = colors[(j + j2) * width + (i + i2)];
-								totalR += c.getRed();
-								totalG += c.getGreen();
-								totalB += c.getBlue();
+								int c = colors[(j + j2) * width + (i + i2)];
+								totalR += getRed(c);
+								totalG += getGreen(c);
+								totalB += getBlue(c);
 								samplesAccepted++;
 							}
 							samplesTaken++;
@@ -100,7 +106,7 @@ public class getColour{
 				totalG /= desiredSamples;
 				totalB /= desiredSamples;
 				
-				squaredDifferences = (totalR - targetColor.getRed()) * (totalR - targetColor.getRed()) + (totalG - targetColor.getGreen()) * (totalG - targetColor.getGreen()) + (totalB - targetColor.getBlue()) * (totalB - targetColor.getBlue());
+				squaredDifferences = (totalR - getRed(targetColor)) * (totalR - getRed(targetColor)) + (totalG - getGreen(targetColor)) * (totalG - getGreen(targetColor)) + (totalB - getBlue(targetColor)) * (totalB - getBlue(targetColor));
 				if (squaredDifferences < colorThreshold * 10) {
 					continue;
 				}
@@ -117,9 +123,15 @@ public class getColour{
 	}
    
     public static void main(String args[]) throws Exception {
-        getColour obj = new getColour("test.png");
-		Color[] colours = obj.getColours();
-		Point p = obj.predictLaser(colours, obj.width, obj.height, new Color(57, 255, 239), 3 * 2*2);
+		long startTime = System.currentTimeMillis();
+        getColour obj = new getColour("test (1).png");
+		System.out.println(System.currentTimeMillis() - startTime);
+		startTime = System.currentTimeMillis();
+		int[] colours = obj.getColours();
+		System.out.println(System.currentTimeMillis() - startTime);
+		startTime = System.currentTimeMillis();
+		Point p = obj.predictLaser(colours, obj.width, obj.height, (57 << 16) | (255 << 8) | 239, 3 * 4*4);
+		System.out.println(System.currentTimeMillis() - startTime);
 		System.out.println(p);
     }
 }
