@@ -71,7 +71,7 @@ public class getColour{
 					continue;
 				}
 				
-				int threshold = 175;
+				int threshold = 150;
 				float luminance = getLuminance(color);
 				if (luminance < threshold) {
 					continue;
@@ -107,7 +107,7 @@ public class getColour{
 				totalB /= desiredSamples;
 				
 				squaredDifferences = (totalR - getRed(targetColor)) * (totalR - getRed(targetColor)) + (totalG - getGreen(targetColor)) * (totalG - getGreen(targetColor)) + (totalB - getBlue(targetColor)) * (totalB - getBlue(targetColor));
-				if (squaredDifferences < colorThreshold * 10) {
+				if (squaredDifferences < colorThreshold * 1.5) {
 					continue;
 				}
 				
