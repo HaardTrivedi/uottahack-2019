@@ -54,7 +54,9 @@ public class getColour{
         return 0.299f*r + 0.587f*g + 0.114f*b;
 	}
 	
-	Point predictLaser(int[] colors, int width, int height, int targetColor, int colorThreshold) {
+	Point predictLaser(int[] colors, int width, int height) {
+		int targetColor = (57 << 16) | (255 << 8) | 239;
+		int colorThreshold = 3 * 4*4;
 		Random rand = new Random();
 		
 		int peakLumX = -1;
@@ -130,7 +132,7 @@ public class getColour{
 		int[] colours = obj.getColours();
 		System.out.println(System.currentTimeMillis() - startTime);
 		startTime = System.currentTimeMillis();
-		Point p = obj.predictLaser(colours, obj.width, obj.height, (57 << 16) | (255 << 8) | 239, 3 * 4*4);
+		Point p = obj.predictLaser(colours, obj.width, obj.height);
 		System.out.println(System.currentTimeMillis() - startTime);
 		System.out.println(p);
     }
